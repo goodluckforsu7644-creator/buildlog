@@ -1,0 +1,38 @@
+# Secret environment settings
+.env
+.env.*
+!.env.example
+
+# Installed dependencies and virtual environments
+.venv/
+node_modules/
+
+# Generated output and caches
+dist/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.vite/
+coverage/
+.coverage
+htmlcov/
+playwright-report/
+test-results/
+
+# Local SQLite databases and journal files
+*.sqlite
+*.sqlite3
+*.db
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite3-journal
+*.sqlite3-wal
+*.sqlite3-shm
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Logs
+*.log
+logs/
