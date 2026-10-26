@@ -1,6 +1,6 @@
-# BuildLog 개발 환경과 Phase 0 결과
+# BuildLog 개발 환경과 Phase 0·1 결과
 
-## 1. 확인 결과
+## 1. Phase 0 확인 결과 (당시 기록)
 
 - 확인일: 2026-10-26, Asia/Seoul 기준.
 - Phase 0 완료: 문서·개발 도구 확인 및 구현 기준 결정.
@@ -57,7 +57,7 @@ PowerShell 실행 정책을 바꾸지 않고 `npm.cmd`와 가상환경의 Python
 
 ## 4. 기술과 버전 기준
 
-다음은 PyPI·npm 공식 레지스트리의 안정 배포 메타데이터를 조회해 선택한 기준 버전입니다. Python 요구 버전, Node 엔진, 주요 peer 의존성 범위는 확인했습니다. 설치·의존성 해결·실행 호환성의 최종 확인은 Phase 1에서 진행하며 현재 완료한 테스트로 표시하지 않습니다.
+다음은 PyPI·npm 공식 레지스트리의 안정 배포 메타데이터를 조회해 선택한 기준 버전입니다. Python 요구 버전, Node 엔진, 주요 peer 의존성 범위는 확인했습니다. Phase 1에서 아래 도구 중 해당 단계에 필요한 항목을 실제 설치·테스트했습니다. SQLAlchemy·Alembic·pwdlib·Psycopg는 이후 단계에서 설치합니다. 전체 설치 버전은 `backend/requirements.txt`와 `frontend/package-lock.json`을 기준으로 합니다.
 
 | 도구 | 기준 버전 | 처음 필요한 단계 |
 | --- | --- | --- |
@@ -101,10 +101,10 @@ SQLite3만으로 초기 개발할 수 있도록 FastAPI 자체 회원 인증을 
 | FastAPI 주소 | `http://localhost:8000` |
 | API 접두 경로 | `/api` |
 | 상태 확인 | `/api/health`, 비밀 정보는 응답하지 않음 |
-| API 명세 화면 | FastAPI `/docs`, Phase 1에서 생성 |
+| API 명세 화면 | `http://localhost:8000/docs` |
 | SQLite3 파일 | 프로젝트 루트의 `database/buildlog.sqlite3` |
-| 서버 설정 파일 | `backend/.env`, Phase 1에서 예제 준비 |
-| 프런트 설정 파일 | `frontend/.env`, Phase 1에서 예제 준비 |
+| 서버 설정 파일 | `backend/.env` (선택), `backend/.env.example` 제공 |
+| 프런트 설정 파일 | `frontend/.env` (선택), `frontend/.env.example` 제공 |
 | `APP_ENV` | `development` / `test` / `production` |
 | `DATABASE_URL` | SQLite3는 `sqlite+pysqlite:///`와 절대 경로 사용, Supabase는 서버 전용 PostgreSQL 연결 문자열 |
 | `CORS_ORIGINS` | `["http://localhost:5173"]` 형식의 JSON 배열 |
@@ -125,39 +125,46 @@ SQLite 경로는 프로젝트 루트에서 절대 경로로 해석하여 실행 
 - 상세 예외·SQL·접속 문자열은 응답에 포함하지 않습니다. React는 실패 시 입력과 직전 저장 상태를 보존합니다.
 - 화면은 입력을 돕고 서버의 Pydantic·서비스 처리·필요한 DB 제약으로 최종 검증합니다.
 
-## 8. 향후 사용할 실행 명령
+## 8. 설치와 실행 명령 (Phase 1 확인 완료)
 
-아래는 Phase 1 이후 구현할 예정 명령입니다. 현재 앱과 테스트가 이미 실행 가능하다는 뜻이 아닙니다.
+Windows PowerShell 기준입니다. 이미 준비된 현재 환경에서는 설치를 반복할 필요 없이 서버 실행 두 명령을 각각 별도 터미널에서 실행하면 됩니다. 기본 개발 설정으로 동작하므로 `.env` 생성은 필수가 아닙니다.
 
 ```powershell
-# 프로젝트 루트, Phase 1
+# 새 환경에서 최초 설치: 프로젝트 루트
 py -3.13 -m venv backend/.venv
 backend/.venv/Scripts/python.exe -m pip install -r backend/requirements.txt
 
 # backend/에서 실행
-.venv/Scripts/python.exe -m uvicorn app.main:app --reload --host localhost --port 8000
+.venv/Scripts/python.exe -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 .venv/Scripts/python.exe -m pytest
 
-# frontend/에서 실행, 최초 잠금 파일 생성 후에는 npm ci 사용
-npm.cmd install
-npm.cmd run dev -- --host localhost --port 5173 --strictPort
+# frontend/에서 최초 설치: 잠금 파일의 버전으로 설치
+npm.cmd ci
+npm.cmd run dev
 npm.cmd run test -- --run
 npm.cmd run build
 
-# backend/, 사용자·DB 구조를 만든 Phase 2 이후
-.venv/Scripts/python.exe -m alembic upgrade head
+# 선택: 브라우저 테스트 설치·실행 (개발 서버를 먼저 종료)
+npx.cmd playwright install chromium
+npm.cmd run test:e2e
 ```
 
-각 명령은 실제 구현한 Phase에서 결과를 기록합니다. Supabase에서는 전용 검증 DB 연결 대상을 확인한 뒤 마이그레이션을 적용합니다.
+브라우저에서 `http://localhost:5173`을 열면 연결 상태 화면을 볼 수 있습니다. API는 `http://localhost:8000/api/health`, API 명세는 `http://localhost:8000/docs`입니다. 서버 종료는 각 터미널에서 Ctrl+C를 누릅니다.
+
+환경을 바꾸려면 `backend/.env.example`을 `backend/.env`로, `frontend/.env.example`을 `frontend/.env`로 복사하고 값을 수정한 뒤 서버를 다시 실행합니다. 현재 서버 설정 항목은 `APP_ENV`, `CORS_ORIGINS`뿐입니다. 6장의 DB·세션 변수는 이후 Phase의 예정 설정이며 아직 `.env`에 추가하지 않습니다. 실제 비밀값을 포함하는 설정 파일은 Git에 추가하지 않습니다.
+
+`requirements.in`은 직접 선택한 의존성, `requirements.txt`는 실제 설치한 전체 고정 버전입니다. 의존성을 바꾸면 가상환경에서 검증한 뒤 `pip freeze`로 고정 목록도 갱신합니다. npm은 `package-lock.json`을 함께 유지합니다.
+
+Playwright는 테스트 때 8000·5173 서버를 직접 시작·종료합니다. 해당 포트에서 수동 실행 중인 서버가 있으면 종료한 뒤 테스트합니다. DB와 Alembic은 아직 준비하지 않았으며 Phase 2 전에는 마이그레이션 명령을 실행하지 않습니다.
 
 ## 9. 발견 사항과 후속 작업
 
 | 항목 | 현재 상태 | 처리 시점 |
 | --- | --- | --- |
-| 루트 `.gitignore` | 없으며 `frontend/.gitignore`만 있음. backend·database에는 적용되지 않음 | Phase 1 파일 생성 전에 루트 규칙 생성 |
-| SQLite3 제외 | 현재 frontend 규칙에도 없음 | Phase 1에서 DB 본체·journal·wal·shm 및 테스트 생성물 제외 |
+| 루트 `.gitignore` | Git 준비 작업에서 생성 완료, Phase 1에서 동작 검증 | 완료 |
+| SQLite3 제외 | 루트 규칙에 DB 본체·journal·wal·shm 및 테스트 생성물 제외 | Phase 1 검증 완료 |
 | Python 선택 | PATH 기본은 3.15 | Phase 1에서 `py -3.13` 명시 |
-| FastAPI·React 실행 | 앱·의존성 미생성 | Phase 1에서 처음 검증 |
+| FastAPI·React 실행 | 가상환경·앱·테스트·빌드 준비 완료 | Phase 1 완료 |
 | Supabase | 프로젝트·접속 미검증 | Phase 13 전에 검증용 프로젝트와 연결 정보 준비 |
 | Safari 확인 | 현재 Windows만으로 실제 Safari 검증 불가 | Phase 12에 macOS/iOS 또는 이용 가능한 검증 환경 필요. WebKit 자동화와 Safari 실기기 검증 구분 |
 
@@ -173,7 +180,7 @@ npm.cmd run build
 - 앱 자동 테스트·화면 확인: 해당 없음. 아직 코드와 화면이 없어 수행 완료로 간주하지 않습니다.
 - Phase 1 시작을 위해 사용자가 제공할 값: 없습니다.
 
-다음에는 Phase 1만 진행합니다. 루트 제외 규칙을 먼저 준비하고 Python 3.13 가상환경·FastAPI·React를 구성해 상태 확인 API 호출을 검증합니다.
+위 판정은 Phase 0 당시 기록입니다. Phase 1까지 완료했으며 현재 결과와 다음 작업은 아래 12장을 참고합니다.
 
 ## 11. 확인 자료
 
@@ -182,3 +189,33 @@ npm.cmd run build
 - [Supabase PostgreSQL 연결](https://supabase.com/docs/guides/database/connecting-to-postgres)
 - [PyPI FastAPI 메타데이터](https://pypi.org/pypi/fastapi/json), [SQLAlchemy](https://pypi.org/pypi/sqlalchemy/json), [Alembic](https://pypi.org/pypi/alembic/json)
 - [npm React 메타데이터](https://registry.npmjs.org/react/latest), [Vite](https://registry.npmjs.org/vite/latest), [Vitest](https://registry.npmjs.org/vitest/latest)
+
+## 12. Phase 1 결과 — 2026-10-26
+
+### 구현 완료
+
+- Python 3.13 가상환경과 FastAPI `GET /api/health`를 구성했습니다. 응답은 `{"status":"ok","service":"BuildLog"}`이며 DB에 접속하지 않습니다.
+- 설정은 실행 디렉터리에 관계없이 `backend/.env`에서 읽고 허용 CORS 출처를 명시적으로 검증합니다. 기본 출처는 `http://localhost:5173`입니다.
+- React 기본 화면에 연결 대기·성공·실패 안내, 재시도, 5초 요청 제한, 화면 정리 시 요청 취소를 구현했습니다.
+- 예제 환경 파일에는 비밀값이 없는 공개 개발 설정만 두었습니다. 실제 `.env`는 만들지 않았습니다.
+- 기존 루트 제외 규칙이 가상환경·설치 폴더·빌드·테스트 결과·DB를 제외하고 중첩 `.env.example`은 허용하는지 확인했습니다.
+- 기존 `docs/README.md`, `frontend/PRD.md`, `frontend/mvp.md`는 변경하지 않았습니다.
+
+### 검증 결과
+
+| 검증 | 결과 |
+| --- | --- |
+| 백엔드 pytest | 10개 통과: 상태 응답·API 명세·CORS·설정 로딩 |
+| pip check | 의존성 충돌 없음 |
+| React Vitest | 6개 통과: 로딩·성공·네트워크 실패 후 복구·HTTP/응답 오류 |
+| Vite 프로덕션 빌드 | 성공 |
+| Chromium Playwright | 3개 통과: 실제 서버 연결·연결 실패 재현 및 재시도·360px 가로 넘침 확인 |
+| 화면 직접 검토 | 데스크톱·360px 스크린샷 확인, 레이아웃 문제 없음 |
+
+브라우저 오류 테스트는 요청을 차단해 연결 거절을 재현한 뒤 차단을 해제하고 실제 API로 복구하는 방식입니다. 전체 브라우저 호환성 검증은 Phase 12에서 수행합니다. Starlette 테스트 도구가 HTTPX 사용에 대해 사용 중단 예정 경고 1건을 출력하지만 테스트는 통과합니다. 현재 고정 버전에서 동작을 확인했으며 테스트 전송 도구 변경은 추후 의존성 갱신 시 검토합니다.
+
+스크린샷과 브라우저 테스트 결과는 Git에서 제외되는 `frontend/test-results/`에 생성됩니다. 사용자·인증·DB·기록 기능은 구현하지 않았고 테스트 서버는 검증 후 종료했습니다. commit과 push는 진행하지 않았습니다.
+
+다음은 Phase 2: SQLAlchemy·Alembic을 추가하고 사용자·세션 모델과 첫 SQLite3 마이그레이션을 만드는 작업입니다. 현재 사용자에게 필요한 추가 입력값은 없습니다.
+
+참고: [FastAPI CORS 설정](https://fastapi.tiangolo.com/tutorial/cors/), [Vite 환경 변수](https://vite.dev/guide/env-and-mode).

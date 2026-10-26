@@ -129,7 +129,7 @@ React 화면에서 FastAPI 상태 확인 API를 호출하는 빈 서비스를 �
 4. React 기본 화면, 공통 CSS, API 요청 모듈을 만듭니다.
 5. React API 주소와 FastAPI 허용 출처를 환경별로 설정하고 브라우저 호출을 연결합니다.
 6. 서버 설정은 환경 변수에서 읽고 `.env.example`에는 비밀값 없는 항목 예시만 기록합니다. `VITE_` 설정에는 공개 가능한 API 주소만 둡니다.
-7. 다른 파일을 생성하기 전에 루트 `.gitignore`를 먼저 준비합니다. 현재 `frontend/.gitignore`만 있으므로 루트 규칙에 SQLite3·journal·wal·shm, 비밀 설정, 의존성·생성 파일·로그 제외와 `.env.example` 허용을 적용합니다.
+7. Git 준비 작업에서 이미 생성한 루트 `.gitignore`를 확인합니다. SQLite3·journal·wal·shm, 비밀 설정, 의존성·생성 파일·로그 제외와 중첩 `.env.example` 허용을 검증합니다.
 8. Phase 0에서 정한 실행·테스트 명령과 작업 디렉터리를 `docs/setup.md`에 기록합니다.
 9. 아직 사용자 테이블과 실제 데이터베이스를 만들거나 마이그레이션을 적용하지 않습니다.
 
@@ -140,7 +140,7 @@ React 화면에서 FastAPI 상태 확인 API를 호출하는 빈 서비스를 �
 - `frontend/package.json`, 패키지 잠금 파일, `frontend/vite.config.js`
 - `frontend/index.html`, `frontend/src/main.jsx`, `frontend/src/App.jsx`
 - `frontend/src/api/client.js`, `frontend/src/styles/base.css`
-- `.env.example`, `.gitignore`, `docs/setup.md`
+- `backend/.env.example`, `frontend/.env.example`, `.gitignore`, `docs/setup.md`
 
 #### 확인 방법과 완료 조건
 
@@ -747,3 +747,12 @@ SQLite3에서 구현한 기능을 실제 DB인 Supabase PostgreSQL에서도 검�
 - 루트 `.gitignore` 부재는 Phase 1의 첫 작업으로 기록했습니다.
 - 패키지 설치·앱 구현·DB 파일 생성·Git 초기화·커밋은 하지 않았습니다. 앱 테스트와 화면 확인은 아직 대상이 없습니다.
 - Phase 1에 필요한 사용자 입력값은 없습니다. Phase 1은 아직 시작하지 않았습니다.
+## 9. Phase 1 수행 결과 — 2026-10-26
+
+- 상태: 완료. FastAPI 상태 확인 API와 React 연결 상태 화면을 구현했습니다.
+- 백엔드 테스트 10개, React 테스트 6개, Chromium 브라우저 테스트 3개가 통과했습니다. pip 의존성 검사와 Vite 빌드도 통과했습니다.
+- 실제 브라우저 API 연결, 연결 거절 재현 후 재시도, 360px 화면과 데스크톱 스크린샷을 확인했습니다.
+- 실행·검증 명령과 예제 설정은 `docs/setup.md` 8·12장에 기록했습니다.
+- 기존 루트 `.gitignore`를 검증했으며 가상환경·설치 폴더·빌드·테스트 결과는 저장 대상에서 제외됩니다.
+- 사용자·DB·기록 기능, 마이그레이션, commit·push는 수행하지 않았습니다.
+- 다음은 Phase 2이며 아직 시작하지 않았습니다.
